@@ -39,17 +39,20 @@ const deleteItems = (req, res) => {
     .then((item) => {
       if (item.owner.toString() !== req.user._id) {
         return res.status(BAD_REQUEST).json({
-          message: err.message,
+          message: "You can only delete your own items",
         });
-      } else if (item) {
+      }
+      if (item) {
         return res.send({ message: "Item deleted successfully" });
       }
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
     })
     .catch((err) => {
       console.log(err);
       if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).send({ message: err.message });
-      } else if (err.name === "CastError") {
+      }
+      if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
@@ -73,7 +76,8 @@ const likeItem = (req, res) => {
         return res.status(BAD_REQUEST).json({
           message: err.message,
         });
-      } else if (err.name === "DocumentNotFoundError") {
+      }
+      if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).json({
           message: err.message,
         });
@@ -101,7 +105,8 @@ const dislikeItem = (req, res) => {
         return res.status(NOT_FOUND).json({
           message: err.message,
         });
-      } else if (err.name === "CastError") {
+      }
+      if (err.name === "CastError") {
         return res.status(BAD_REQUEST).json({
           message: err.message,
         });
