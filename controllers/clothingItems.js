@@ -45,7 +45,7 @@ const deleteItems = (req, res) => {
       if (item) {
         return res.send({ message: "Item deleted successfully" });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: "A 500 internal server error has occured" });
     })
     .catch((err) => {
       console.log(err);
