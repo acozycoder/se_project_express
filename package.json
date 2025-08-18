@@ -1,0 +1,36 @@
+{
+  "name": "se_project_express",
+  "version": "1.0.0",
+  "description": "WTWR Back-end",
+  "homepage": "https://github.com/tripleten-com/se_project_express#readme",
+  "bugs": {
+    "url": "https://github.com/tripleten-com/se_project_express/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tripleten-com/se_project_express.git"
+  },
+  "license": "ISC",
+  "author": "Alicia Mckinney",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx eslint .",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mongoose": "^8.17.0",
+    "validator": "^13.15.15"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.10.2",
+    "eslint-plugin-import": "^2.32.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^2.8.8"
+  }
+}
