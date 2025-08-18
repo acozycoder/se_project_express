@@ -11,7 +11,9 @@ const getItems = (req, res) => {
   Item.find({})
     .then((items) => res.status(NULL_FOUND).send(items))
     .catch((err) => {
-      res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occured on the server" });
     });
 };
 
@@ -25,16 +27,20 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.log(err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Item validation failed" });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occured on the server" });
     });
 };
 
 const deleteItems = (req, res) => {
   const { itemId } = req.params;
 
-  Item.findByIdAndDelete(itemId)
+  Item.findById(itemId)
     .orFail()
     .then((item) => {
       if (item.owner.toString() !== req.user._id) {
@@ -42,20 +48,27 @@ const deleteItems = (req, res) => {
           message: "You can only delete your own items",
         });
       }
-      if (item) {
-        return res.send({ message: "Item deleted successfully" });
-      }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: "A 500 internal server error has occured" });
+
+      return Item.findByIdAndDelete(itemId);
+    })
+    .then(() => {
+      return res.send({ message: "Item deleted successfully" });
     })
     .catch((err) => {
       console.log(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: err.message });
+        return res
+          .status(NOT_FOUND)
+          .send({ message: "The requested document cannot be found" });
       }
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Cast to objectId failed" });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occured on the server" });
     });
 };
 
@@ -74,16 +87,16 @@ const likeItem = (req, res) => {
 
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).json({
-          message: err.message,
+          message: "Cast to objectId failed",
         });
       }
       if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).json({
-          message: err.message,
+          message: "The requested document cannot be found",
         });
       }
       return res.status(INTERNAL_SERVER_ERROR).json({
-        message: err.message,
+        message: "An error has occured on the server",
       });
     });
 };
@@ -103,16 +116,16 @@ const dislikeItem = (req, res) => {
 
       if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).json({
-          message: err.message,
+          message: "The requested document cannot be found",
         });
       }
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).json({
-          message: err.message,
+          message: "Cast to objectId failed",
         });
       }
       return res.status(INTERNAL_SERVER_ERROR).json({
-        message: err.message,
+        message: "An error has occured on the server",
       });
     });
 };
