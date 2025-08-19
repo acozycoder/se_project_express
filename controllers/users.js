@@ -10,7 +10,7 @@ const {
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(NULL_FOUND).send(users))
-    .catch((err) => {
+    .catch(() => {
       res
         .status(INTERNAL_SERVER_ERROR)
         .send({ message: "An error has occured on the server" });
@@ -29,7 +29,7 @@ const getUser = (req, res) => {
         return res
           .status(NOT_FOUND)
           .send({ message: "The requested document cannot be found" });
-      } else if (err.name === "CastError") {
+      } if (err.name === "CastError") {
         return res
           .status(BAD_REQUEST)
           .send({ message: "Cast to objectId failed" });

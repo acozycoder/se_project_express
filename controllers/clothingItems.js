@@ -2,15 +2,14 @@ const Item = require("../models/clothingItem");
 const {
   BAD_REQUEST,
   INTERNAL_SERVER_ERROR,
-  NULL_FOUND,
   SUCCESS_CODE,
   NOT_FOUND,
 } = require("../utils/errors");
 
 const getItems = (req, res) => {
   Item.find({})
-    .then((items) => res.status(NULL_FOUND).send(items))
-    .catch((err) => {
+    .then((items) => res.status(200).send(items))
+    .catch(() => {
       res
         .status(INTERNAL_SERVER_ERROR)
         .send({ message: "An error has occured on the server" });
@@ -51,9 +50,7 @@ const deleteItems = (req, res) => {
 
       return Item.findByIdAndDelete(itemId);
     })
-    .then(() => {
-      return res.send({ message: "Item deleted successfully" });
-    })
+    .then(() => res.send({ message: "Item deleted successfully" }))
     .catch((err) => {
       console.log(err);
       if (err.name === "DocumentNotFoundError") {
