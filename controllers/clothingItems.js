@@ -4,6 +4,7 @@ const {
   INTERNAL_SERVER_ERROR,
   SUCCESS_CODE,
   NOT_FOUND,
+  WRONG_USER,
 } = require("../utils/errors");
 
 const getItems = (req, res) => {
@@ -43,7 +44,7 @@ const deleteItems = (req, res) => {
     .orFail()
     .then((item) => {
       if (item.owner.toString() !== req.user._id) {
-        return res.status(BAD_REQUEST).json({
+        return res.status(WRONG_USER).json({
           message: "You can only delete your own items",
         });
       }
