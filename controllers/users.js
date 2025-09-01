@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
 const {
   BAD_REQUEST,
@@ -9,18 +10,8 @@ const {
 } = require("../utils/errors");
 const bcrypt = require("bcryptjs");
 
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch(() => {
-      res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occured on the server" });
-    });
-};
-
 const getCurrentUser = (req, res) => {
-  const { userId } = req.user._id;
+  const userId = req.user._id;
 
   User.findById(userId)
     .orFail()
@@ -77,30 +68,11 @@ const login = (req, res) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials({ email, password })
-    .then((email) => {
-      return this.findOne({ email });
-    })
-    .select("+password")
     .then((user) => {
-      if (!user) {
-        return Promise.reject(new Error("Incorrect email or password"));
-      }
-      return bcrypt.compare(password, user.password);
-    })
-
-    .then((matched) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-
-      if (!matched) {
-        return Promise.reject(new Error("Incorrect email or password"));
-      }
-
-      return res.status(user).json({
-        token,
-        message: "Welcome back",
-      });
+      res.status(200).json({ token });
     })
     .catch((err) => {
       console.log(err);
@@ -160,4 +132,4 @@ const updateProfile = (req, res) => {
     });
 };
 
-module.exports = { getCurrentUser, getUsers, createUser, login, updateProfile };
+module.exports = { getCurrentUser, createUser, login, updateProfile };
