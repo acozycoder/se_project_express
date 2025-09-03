@@ -49,9 +49,11 @@ const deleteItems = (req, res) => {
         });
       }
 
-      return Item.findByIdAndDelete(itemId);
+      return Item.findByIdAndDelete(itemId).then(() =>
+        res.send({ message: "Item deleted successfully" })
+      );
     })
-    .then(() => res.send({ message: "Item deleted successfully" }))
+
     .catch((err) => {
       console.log(err);
       if (err.name === "DocumentNotFoundError") {
