@@ -6,7 +6,7 @@ const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
-    res.status(AUTHORIZATION_ERROR).json({
+    return res.status(AUTHORIZATION_ERROR).json({
       message: "Authorization required",
     });
   }
@@ -25,7 +25,7 @@ const auth = (req, res, next) => {
 
   req.user = payload;
 
-  next();
+  return next();
 };
 
 module.exports = auth;

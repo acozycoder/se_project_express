@@ -9,7 +9,7 @@ const {
 
 const getItems = (req, res) => {
   Item.find({})
-    .then((items) => res.status(200).send(items))
+    .then((items) => res.send(items))
     .catch(() => {
       res
         .status(INTERNAL_SERVER_ERROR)

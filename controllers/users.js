@@ -1,5 +1,6 @@
-const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 const {
   BAD_REQUEST,
@@ -8,14 +9,13 @@ const {
   USER_ERROR,
   AUTHORIZATION_ERROR,
 } = require("../utils/errors");
-const bcrypt = require("bcryptjs");
 
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
 
   User.findById(userId)
     .orFail()
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.send({ user }))
     .catch((err) => {
       console.log(err);
       if (err.name === "DocumentNotFoundError") {
@@ -37,14 +37,12 @@ const createUser = (req, res) => {
 
   bcrypt
     .hash(password, 10)
-    .then((hash) => {
-      return User.create({ name, avatar, email, password: hash });
-    })
+    .then((hash) => User.create({ name, avatar, email, password: hash }))
     .then((user) => {
       const userObj = user.toObject();
       delete userObj.password;
 
-      res.status(200).json(userObj);
+      return res.json(userObj);
     })
     .catch((err) => {
       console.log(err);
@@ -73,12 +71,12 @@ const login = (req, res) => {
       .send({ message: "Please enter your email and password" });
   }
 
-  User.findUserByCredentials(email, password)
+ return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.status(200).json({ token });
+      return res.json({ token });
     })
     .catch((err) => {
       console.log(err);
@@ -115,7 +113,7 @@ const updateProfile = (req, res) => {
         return res.status(NOT_FOUND).json({ message: "User not found" });
       }
 
-      res.status(200).json(user);
+      return res.json(user);
     })
     .catch((err) => {
       console.log(err);
@@ -132,7 +130,7 @@ const updateProfile = (req, res) => {
         });
       }
 
-      res.status(INTERNAL_SERVER_ERROR).json({
+      return res.status(INTERNAL_SERVER_ERROR).json({
         message: "An error has occured on the server",
       });
     });
