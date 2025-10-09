@@ -1,3 +1,4 @@
+const { BadRequestError, ForbiddenError, NotFoundError } = require("../errors");
 const Item = require("../models/clothingItem");
 const {
   BAD_REQUEST,
@@ -11,9 +12,7 @@ const getItems = (req, res) => {
   Item.find({})
     .then((items) => res.send(items))
     .catch(() => {
-      res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occured on the server" });
+      next(err);
     });
 };
 
@@ -27,13 +26,9 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.log(err);
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Item validation failed" });
+        next(new BadRequestError("Item validation failed"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occured on the server" });
+      next(err);
     });
 };
 
@@ -44,9 +39,7 @@ const deleteItems = (req, res) => {
     .orFail()
     .then((item) => {
       if (item.owner.toString() !== req.user._id) {
-        return res.status(WRONG_USER).json({
-          message: "You can only delete your own items",
-        });
+        next(new ForbiddenError("You can only delete your own items"));
       }
 
       return Item.findByIdAndDelete(itemId).then(() =>
@@ -57,18 +50,12 @@ const deleteItems = (req, res) => {
     .catch((err) => {
       console.log(err);
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "The requested document cannot be found" });
+        next(new NotFoundError("The requested document cannot be found"));
       }
       if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Cast to objectId failed" });
+        next(new BadRequestError("Cast to obectId failed"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occured on the server" });
+      next(err);
     });
 };
 
@@ -86,18 +73,12 @@ const likeItem = (req, res) => {
       console.log(err);
 
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).json({
-          message: "Cast to objectId failed",
-        });
+        next(new BadRequestError("Cast to obectId failed"));
       }
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).json({
-          message: "The requested document cannot be found",
-        });
+        next(new NotFoundError("The requested document cannot be found"));
       }
-      return res.status(INTERNAL_SERVER_ERROR).json({
-        message: "An error has occured on the server",
-      });
+      next(err);
     });
 };
 
@@ -115,18 +96,12 @@ const dislikeItem = (req, res) => {
       console.log(err);
 
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).json({
-          message: "The requested document cannot be found",
-        });
+        next(new NotFoundError("The requested document cannot be found"));
       }
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).json({
-          message: "Cast to objectId failed",
-        });
+        next(new BadRequestError("Cast to obectId failed"));
       }
-      return res.status(INTERNAL_SERVER_ERROR).json({
-        message: "An error has occured on the server",
-      });
+      next(err);
     });
 };
 

@@ -3,14 +3,13 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 const {
-  BAD_REQUEST,
-  INTERNAL_SERVER_ERROR,
-  NOT_FOUND,
-  USER_ERROR,
-  AUTHORIZATION_ERROR,
-} = require("../utils/errors");
+  NotFoundError,
+  BadRequestError,
+  ConflictError,
+  UnauthorizedError,
+} = require("../errors");
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
   User.findById(userId)
@@ -19,16 +18,12 @@ const getCurrentUser = (req, res) => {
     .catch((err) => {
       console.log(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
+        next(new NotFoundError("User not found"));
       }
       if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Cast to objectId failed" });
+        next(new BadRequestError("Cast to objectId failed"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occured on the server" });
+      next(err);
     });
 };
 
@@ -47,18 +42,12 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.log(err);
       if (err.code === 11000) {
-        return res.status(USER_ERROR).json({
-          message: "A user with this email already exists.",
-        });
+        next(new ConflictError("A user with this email already exists"));
       }
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "User validation failed" });
+        next(new BadRequestError("User validation failed"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occured on the server" });
+      next(err);
     });
 };
 
@@ -66,12 +55,10 @@ const login = (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(BAD_REQUEST)
-      .send({ message: "Please enter your email and password" });
+    next(new BadRequestError("Please enter your email and password"));
   }
 
- return User.findUserByCredentials(email, password)
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -81,18 +68,12 @@ const login = (req, res) => {
     .catch((err) => {
       console.log(err);
       if (err.message === "Incorrect email or password") {
-        return res
-          .status(AUTHORIZATION_ERROR)
-          .send({ message: "Incorrect email or password" });
+        next(new UnauthorizedError("Incorrect email or password"));
       }
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "User validation failed" });
+        next(new BadRequestError("User validation failed"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occured on the server" });
+      next(err);
     });
 };
 
@@ -110,7 +91,7 @@ const updateProfile = (req, res) => {
   })
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).json({ message: "User not found" });
+        next(new NotFoundError("User not found"));
       }
 
       return res.json(user);
@@ -119,20 +100,14 @@ const updateProfile = (req, res) => {
       console.log(err);
 
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).json({
-          message: "Data provided invalided",
-        });
+        next(new BadRequestError("Data provided invalid"));
       }
 
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).json({
-          message: "Invalid user ID",
-        });
+        next(new BadRequestError("Invalid user ID"));
       }
 
-      return res.status(INTERNAL_SERVER_ERROR).json({
-        message: "An error has occured on the server",
-      });
+      next(err);
     });
 };
 
