@@ -15,6 +15,13 @@ app.use(cors());
 app.use(express.json());
 
 app.use(requestLogger);
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Server will crash now');
+  }, 0);
+});
+
 app.post("/signup", createUser);
 app.post("/signin", login);
 app.use("/", mainRouter);
