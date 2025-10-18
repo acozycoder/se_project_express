@@ -1,11 +1,11 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const { errors } = require("celebrate");
 const mainRouter = require("./routes/index");
 const { login, createUser } = require("./controllers/users");
 
-const { errors } = require("celebrate");
 const errorHandler = require("./middlewares/error-handler");
 const { requestLogger, errorLogger } = require("./middlewares/loggers");
 
@@ -16,9 +16,9 @@ app.use(express.json());
 
 app.use(requestLogger);
 
-app.get('/crash-test', () => {
+app.get("/crash-test", () => {
   setTimeout(() => {
-    throw new Error('Server will crash now');
+    throw new Error("Server will crash now");
   }, 0);
 });
 

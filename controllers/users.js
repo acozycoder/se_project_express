@@ -2,12 +2,10 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
-const {
-  NotFoundError,
-  BadRequestError,
-  ConflictError,
-  UnauthorizedError,
-} = require("../errors");
+const NotFoundError = require("../errors/not-found-err");
+const BadRequestError = require("../errors/bad-request-err");
+const ConflictError = require("../errors/conflict-err");
+const UnauthorizedError = require("../errors/unauthorized-err");
 
 const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
@@ -27,7 +25,7 @@ const getCurrentUser = (req, res, next) => {
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   bcrypt
@@ -51,7 +49,7 @@ const createUser = (req, res) => {
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -77,7 +75,7 @@ const login = (req, res) => {
     });
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const userId = req.user._id;
   const { name, avatar } = req.body;
 

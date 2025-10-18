@@ -1,22 +1,19 @@
-const { BadRequestError, ForbiddenError, NotFoundError } = require("../errors");
-const Item = require("../models/clothingItem");
-const {
-  BAD_REQUEST,
-  INTERNAL_SERVER_ERROR,
-  SUCCESS_CODE,
-  NOT_FOUND,
-  WRONG_USER,
-} = require("../utils/errors");
+const BadRequestError = require("../errors/bad-request-err");
+const ForbiddenError = require("../errors/forbidden-err");
+const NotFoundError = require("../errors/not-found-err");
 
-const getItems = (req, res) => {
+const Item = require("../models/clothingItem");
+const { SUCCESS_CODE } = require("../utils/errors");
+
+const getItems = (req, res, next) => {
   Item.find({})
     .then((items) => res.send(items))
-    .catch(() => {
+    .catch((err) => {
       next(err);
     });
 };
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
   console.log(owner);
@@ -32,7 +29,7 @@ const createItem = (req, res) => {
     });
 };
 
-const deleteItems = (req, res) => {
+const deleteItems = (req, res, next) => {
   const { itemId } = req.params;
 
   Item.findById(itemId)
@@ -59,7 +56,7 @@ const deleteItems = (req, res) => {
     });
 };
 
-const likeItem = (req, res) => {
+const likeItem = (req, res, next) => {
   Item.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
@@ -82,7 +79,7 @@ const likeItem = (req, res) => {
     });
 };
 
-const dislikeItem = (req, res) => {
+const dislikeItem = (req, res, next) => {
   Item.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
