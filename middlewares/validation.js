@@ -65,13 +65,3 @@ module.exports.validateId = celebrate({
   }),
 });
 
-module.exports.validateUserId = celebrate({
-  params: Joi.object().keys({
-    userId: Joi.string()
-      .pattern(/^[0-9a-fA-F]{24}$/)
-      .messages({
-        "string.pattern.base":
-          "User ID must be a valid 24-character hexadecimal string",
-      }),
-  }),
-});
